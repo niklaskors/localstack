@@ -36,7 +36,7 @@ LAMBDA_EVENT_FILE = 'event_file.json'
 LOG = logging.getLogger(__name__)
 
 # maximum time a pre-allocated container can sit idle before getting killed
-MAX_CONTAINER_IDLE_TIME = 600
+MAX_CONTAINER_IDLE_TIME = float('inf')
 
 
 class LambdaExecutor(object):
@@ -228,6 +228,7 @@ class LambdaExecutorReuseContainers(LambdaExecutorContainers):
                 cmd = (
                     'docker create'
                     ' --name "%s"'
+                    ' --net skyhawk-stack_skyhawk'
                     ' --entrypoint /bin/bash'  # Load bash when it starts.
                     ' --interactive'  # Keeps the container running bash.
                     ' -e AWS_LAMBDA_EVENT_BODY="$AWS_LAMBDA_EVENT_BODY"'

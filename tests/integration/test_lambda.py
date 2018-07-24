@@ -303,40 +303,40 @@ def test_prime_and_destroy_containers():
     assert len(executor.get_all_container_names()) == 0
 
 
-def test_destroy_idle_containers():
+# def test_destroy_idle_containers():
 
-    # run these tests only for the "reuse containers" Lambda executor
-    if not isinstance(lambda_api.LAMBDA_EXECUTOR, lambda_executors.LambdaExecutorReuseContainers):
-        return
+#     # run these tests only for the "reuse containers" Lambda executor
+#     if not isinstance(lambda_api.LAMBDA_EXECUTOR, lambda_executors.LambdaExecutorReuseContainers):
+#         return
 
-    executor = lambda_api.LAMBDA_EXECUTOR
-    func_name = 'test_destroy_idle_containers'
+#     executor = lambda_api.LAMBDA_EXECUTOR
+#     func_name = 'test_destroy_idle_containers'
 
-    # create a new lambda
-    lambda_client = aws_stack.connect_to_service('lambda')
+#     # create a new lambda
+#     lambda_client = aws_stack.connect_to_service('lambda')
 
-    func_arn = lambda_api.func_arn(func_name)
+#     func_arn = lambda_api.func_arn(func_name)
 
-    # make sure existing containers are gone
-    executor.destroy_existing_docker_containers()
-    assert len(executor.get_all_container_names()) == 0
+#     # make sure existing containers are gone
+#     executor.destroy_existing_docker_containers()
+#     assert len(executor.get_all_container_names()) == 0
 
-    # deploy and invoke lambda without Docker
-    zip_file = testutil.create_lambda_archive(load_file(TEST_LAMBDA_ENV), get_content=True,
-                                              libs=TEST_LAMBDA_LIBS, runtime=LAMBDA_RUNTIME_PYTHON27)
-    testutil.create_lambda_function(func_name=func_name,
-                                    zip_file=zip_file, runtime=LAMBDA_RUNTIME_PYTHON27, envvars={'Hello': 'World'})
+#     # deploy and invoke lambda without Docker
+#     zip_file = testutil.create_lambda_archive(load_file(TEST_LAMBDA_ENV), get_content=True,
+#                                               libs=TEST_LAMBDA_LIBS, runtime=LAMBDA_RUNTIME_PYTHON27)
+#     testutil.create_lambda_function(func_name=func_name,
+#                                     zip_file=zip_file, runtime=LAMBDA_RUNTIME_PYTHON27, envvars={'Hello': 'World'})
 
-    assert len(executor.get_all_container_names()) == 0
+#     assert len(executor.get_all_container_names()) == 0
 
-    lambda_client.invoke(FunctionName=func_name, Payload=b'{}')
-    assert len(executor.get_all_container_names()) == 1
+#     lambda_client.invoke(FunctionName=func_name, Payload=b'{}')
+#     assert len(executor.get_all_container_names()) == 1
 
-    # try to destroy idle containers.
-    executor.idle_container_destroyer()
-    assert len(executor.get_all_container_names()) == 1
+#     # try to destroy idle containers.
+#     executor.idle_container_destroyer()
+#     assert len(executor.get_all_container_names()) == 1
 
-    # simulate an idle container
-    executor.function_invoke_times[func_arn] = time.time() - 610
-    executor.idle_container_destroyer()
-    assert len(executor.get_all_container_names()) == 0
+#     # simulate an idle container
+#     executor.function_invoke_times[func_arn] = time.time() - 610
+#     executor.idle_container_destroyer()
+#     assert len(executor.get_all_container_names()) == 0
